@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot Dental - Demo</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .chat-container {
+            width: 100%;
+            max-width: 500px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+            animation: slideUp 0.5s ease;
+        }
+        
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .chat-header {
+            background: linear-gradient(90deg, #1a73e8, #0d47a1);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+        
+        .chat-header h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .chat-header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+        
+        .chat-messages {
+            height: 400px;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+        
+        .message {
+            margin-bottom: 15px;
+            display: flex;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .user-message {
+            justify-content: flex-end;
+        }
+        
+        .bot-message {
+            justify-content: flex-start;
+        }
+        
+        .message-content {
+            max-width: 70%;
+            padding: 12px 18px;
+            border-radius: 18px;
+            line-height: 1.4;
+            font-size: 14px;
+        }
+        
+        .user-message .message-content {
+            background: #1a73e8;
+            color: white;
+            border-bottom-right-radius: 5px;
+        }
+        
+        .bot-message .message-content {
+            background: white;
+            color: #333;
+            border: 1px solid #e0e0e0;
+            border-bottom-left-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .chat-input-container {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            gap: 10px;
+        }
+        
+        #userInput {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 16px;
+            outline: none;
+            transition: border 0.3s;
+        }
+        
+        #userInput:focus {
+            border-color: #1a73e8;
+        }
+        
+        #sendButton {
+            background: linear-gradient(90deg, #1a73e8, #0d47a1);
+            color: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s;
+        }
+        
+        #sendButton:hover {
+            transform: scale(1.05);
+        }
+        
+        .clinic-info {
+            padding: 15px;
+            background: #f8f9fa;
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .typing-indicator {
+            display: none;
+            padding: 10px 15px;
+            background: white;
+            border-radius: 18px;
+            border: 1px solid #e0e0e0;
+            width: fit-content;
+            margin-bottom: 15px;
+        }
+        
+        .typing-dots {
+            display: flex;
+            gap: 4px;
+        }
+        
+        .typing-dots span {
+            width: 8px;
+            height: 8px;
+            background: #1a73e8;
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+        
+        .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+        
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-5px); }
+        }
+        
+        .quick-questions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .quick-question {
+            background: white;
+            border: 1px solid #e0e0e0;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .quick-question:hover {
+            background: #1a73e8;
+            color: white;
+            border-color: #1a73e8;
+        }
+        
+        .demo-notice {
+            background: #fff3cd;
+            color: #856404;
+            padding: 10px;
+            text-align: center;
+            font-size: 12px;
+            border-top: 1px solid #ffeaa7;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <h1>🦷 Asistente Dental Virtual</h1>
+            <p>Clínica "Sonrisa Perfecta" • Atendemos 24/7</p>
+        </div>
+        
+        <div class="demo-notice">
+            💡 DEMO FUNCIONAL - Listo para vender a clínicas reales
+        </div>
+        
+        <div class="chat-messages" id="messages">
+            <div class="message bot-message">
+                <div class="message-content">
+                    ¡Hola! Soy el asistente virtual de la clínica dental. 
+                    Estoy aquí para ayudarte con:<br><br>
+                    • ✅ Agendar citas<br>
+                    • ✅ Informar horarios y precios<br>
+                    • ✅ Responder preguntas frecuentes<br>
+                    • ✅ Recordatorios automáticos<br><br>
+                    ¿En qué puedo ayudarte hoy?
+                </div>
+            </div>
+        </div>
+        
+        <div class="typing-indicator" id="typing">
+            <div class="typing-dots">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+        
+        <div class="quick-questions">
+            <div class="quick-question" onclick="askQuestion('¿Cuáles son sus horarios?')">📅 Horarios</div>
+            <div class="quick-question" onclick="askQuestion('¿Cuánto cuesta una limpieza dental?')">💰 Precios</div>
+            <div class="quick-question" onclick="askQuestion('¿Cómo agendo una cita?')">📝 Agendar cita</div>
+            <div class="quick-question" onclick="askQuestion('¿Aceptan seguro médico?')">🏥 Seguros</div>
+        </div>
+        
+        <div class="chat-input-container">
+            <input type="text" id="userInput" placeholder="Escribe tu pregunta aquí..." 
+                   onkeypress="if(event.key === 'Enter') sendMessage()">
+            <button id="sendButton" onclick="sendMessage()">➤</button>
+        </div>
+        
+        <div class="clinic-info">
+            📍 Av. Principal 123, Tu Ciudad | 📞 (555) 123-4567 | 
+            📧 info@sonrisaperfecta.com | 🕒 Lun-Vie 9am-6pm, Sáb 9am-1pm
+        </div>
+    </div>
+
+    <script>
+        const messagesDiv = document.getElementById('messages');
+        const userInput = document.getElementById('userInput');
+        const typingIndicator = document.getElementById('typing');
+        const sendButton = document.getElementById('sendButton');
+        
+        // Base de conocimiento para el chatbot
+        const knowledgeBase = {
+            "horarios": "Nuestra clínica está abierta:<br><br>• Lunes a Viernes: 9:00 AM - 6:00 PM<br>• Sábados: 9:00 AM - 1:00 PM<br>• Domingos: Cerrado (solo emergencias)<br><br>¿Te gustaría agendar una cita en algún horario específico?",
+            
+            "precios": "Tenemos diferentes servicios:<br><br>• Limpieza dental: $50 - $80<br>• Consulta general: $30 - $50<br>• Blanqueamiento dental: $150 - $300<br>• Ortodoncia: Desde $100/mes<br>• Implante dental: $800 - $1,500<br><br>*Precios pueden variar según el caso. ¿Te interesa algún servicio en particular?",
+            
+            "cita": "¡Claro! Para agendar una cita necesito saber:<br><br>1. ¿Para qué fecha la deseas?<br>2. ¿Qué servicio necesitas?<br>3. ¿Nombre del paciente?<br><br>Te puedo conectar con nuestro sistema de agendamiento automático. ¿Prefieres contactarnos por WhatsApp al (555) 123-4567?",
+            
+            "seguro": "Sí, trabajamos con las principales aseguradoras:<br><br>• MetLife<br>• Allianz<br>• Mapfre<br>• Seguros Monterrey<br>• Y muchas más...<br><br>¿Cuál es tu aseguradora? Puedo verificar si tenemos convenio.",
+            
+            "ubicacion": "Estamos ubicados en:<br><br>📍 Av. Principal 123, Col. Centro<br>Tu Ciudad, Estado 12345<br><br>Tenemos estacionamiento gratuito para pacientes. ¿Necesitas indicaciones más específicas?",
+            
+            "emergencia": "🚨 PARA EMERGENCIAS DENTALES:<br><br>• Llama inmediatamente: (555) 123-4567<br>• Horario de emergencias: 24/7<br>• Dirección: Av. Principal 123<br><br>Si es una emergencia grave, ve directamente a nuestro consultorio.",
+            
+            "default": "Entiendo tu pregunta. Como asistente virtual, puedo ayudarte con:<br><br>• Agendamiento de citas<br>• Información de horarios y precios<br>• Preguntas sobre seguros médicos<br>• Ubicación y contacto<br><br>¿Podrías ser más específico o prefieres hablar con un recepcionista al (555) 123-4567?"
+        };
+        
+        // Función para enviar mensaje
+        function sendMessage() {
+            const message = userInput.value.trim();
+            if (!message) return;
+            
+            addMessage(message, 'user');
+            userInput.value = '';
+            sendButton.disabled = true;
+            
+            // Mostrar "escribiendo..."
+            showTyping();
+            
+            // Simular procesamiento
+            setTimeout(() => {
+                hideTyping();
+                const response = getBotResponse(message);
+                addMessage(response, 'bot');
+                sendButton.disabled = false;
+                userInput.focus();
+            }, 1000 + Math.random() * 1000);
+        }
+        
+        // Función para preguntas rápidas
+        function askQuestion(question) {
+            userInput.value = question;
+            sendMessage();
+        }
+        
+        // Lógica de respuesta del bot
+        function getBotResponse(userMessage) {
+            const message = userMessage.toLowerCase();
+            
+            if (message.includes('hola') || message.includes('buenas')) {
+                return "¡Hola! 😊 ¿En qué puedo ayudarte hoy? Puedo asistirte con información sobre horarios, precios, citas y más.";
+            }
+            
+            if (message.includes('hora') || message.includes('abren') || message.includes('cierran')) {
+                return knowledgeBase.horarios;
+            }
+            
+            if (message.includes('precio') || message.includes('cuesta') || message.includes('costo') || message.includes('valor')) {
+                return knowledgeBase.precios;
+            }
+            
+            if (message.includes('cita') || message.includes('agendar') || message.includes('reservar')) {
+                return knowledgeBase.cita;
+            }
+            
+            if (message.includes('seguro') || message.includes('aseguradora') || message.includes('pago')) {
+                return knowledgeBase.seguro;
+            }
+            
+            if (message.includes('ubicacion') || message.includes('direccion') || message.includes('donde') || message.includes('mapa')) {
+                return knowledgeBase.ubicacion;
+            }
+            
+            if (message.includes('emergencia') || message.includes('dolor') || message.includes('urgencia')) {
+                return knowledgeBase.emergencia;
+            }
+            
+            if (message.includes('gracias') || message.includes('agradezco')) {
+                return "¡De nada! 😊 Estoy aquí para ayudar. ¿Necesitas información sobre algo más o prefieres que te conecte con un recepcionista al (555) 123-4567?";
+            }
+            
+            return knowledgeBase.default;
+        }
+        
+        // Agregar mensaje al chat
+        function addMessage(text, sender) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}-message`;
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            contentDiv.innerHTML = text;
+            
+            messageDiv.appendChild(contentDiv);
+            messagesDiv.appendChild(messageDiv);
+            
+            // Scroll al final
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+        
+        // Mostrar indicador de "escribiendo"
+        function showTyping() {
+            typingIndicator.style.display = 'block';
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+        
+        // Ocultar indicador
+        function hideTyping() {
+            typingIndicator.style.display = 'none';
+        }
+        
+        // Mensaje de bienvenida automático
+        setTimeout(() => {
+            addMessage("💡 <strong>Consejo:</strong> También puedes usar los botones de arriba para preguntas frecuentes. ¡Pruébalos!", 'bot');
+        }, 3000);
+        
+        // Enfoque automático en el input
+        userInput.focus();
+    </script>
+</body>
+</html>
